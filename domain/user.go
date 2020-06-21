@@ -37,12 +37,16 @@ func (u *User) CheckPassword(plain string) bool {
 
 type UserRepository interface {
 	Save(*User) error
+	GetByID(id primitive.ObjectID) (*User, error)
 	GetByEmail(email string) (*User, error)
 	GetByUsername(username string) (*User, error)
+	Update(*User) error
 }
 
 type UserService interface {
 	Save(*User) error
+	GetByID(id primitive.ObjectID) (*User, error)
 	GetByEmail(email string) (*User, error)
 	GetByUsername(username string) (*User, error)
+	Update(*User) error
 }
