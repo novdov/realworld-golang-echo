@@ -44,7 +44,7 @@ func (u *userRepository) GetByUsername(username string) (*domain.User, error) {
 	return u.getUser("username", username)
 }
 
-func (u *userRepository) getUser(key string, value string) (*domain.User, error) {
+func (u *userRepository) getUser(key string, value interface{}) (*domain.User, error) {
 	result := u.collection().FindOne(
 		context.TODO(),
 		bson.D{{key, value}},
