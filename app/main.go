@@ -44,7 +44,8 @@ func main() {
 	r := router.NewRouter()
 	g := r.Group("/api")
 
-	handler.NewUserHandler(g, userService)
+	userHandler := handler.NewUserHandler(userService)
+	userHandler.Register(g)
 
 	r.Logger.Fatal(r.Start(":8000"))
 }

@@ -13,19 +13,19 @@ type UserHandler struct {
 	userService domain.UserService
 }
 
-func NewUserHandler(g *echo.Group, us domain.UserService) {
-	h := &UserHandler{
-		userService: us,
-	}
+func NewUserHandler(us domain.UserService) *UserHandler {
+	return &UserHandler{userService: us}
+}
 
+func (h *UserHandler) Register(g *echo.Group) {
 	jwtMiddleware := middleware.JWT(utils.JWTSecret)
 
-	profiles := g.Group("/profiles", jwtMiddleware)
-	profiles.GET("/:username", h.GetProfile)
+	profile := g.Group("/profiles", jwtMiddleware)
+	profile.GET("/:username", h.GetProfile)
 
-	guestUsers := g.Group("/users")
-	guestUsers.POST("", h.Signup)
-	guestUsers.POST("/login", h.Login)
+	auth := g.Group("/users")
+	auth.POST("", h.Signup)
+	auth.POST("/login", h.Login)
 }
 
 func (h *UserHandler) Signup(c echo.Context) error {
