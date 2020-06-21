@@ -17,6 +17,22 @@ func NewUserHandler(g *echo.Group, us domain.UserService) {
 	}
 	profiles := g.Group("/profiles")
 	profiles.GET("/:username", h.GetProfile)
+
+	users := g.Group("/users")
+	users.POST("", h.Signup)
+}
+
+func (h *UserHandler) Signup(c echo.Context) error {
+	var u domain.User
+	req := userRegisterRequest{}
+
+	if err := req.bind(c, &u); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
+	}
+	if err := h.userService.Save(&u); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
+	}
+	return c.JSON(http.StatusCreated, newUserResponse(&u))
 }
 
 func (h *UserHandler) GetProfile(c echo.Context) error {
