@@ -36,6 +36,10 @@ func (u *userRepository) Save(user *domain.User) error {
 	return nil
 }
 
+func (u *userRepository) GetByID(id primitive.ObjectID) (*domain.User, error) {
+	return u.getUser("_id", id)
+}
+
 func (u *userRepository) GetByEmail(email string) (*domain.User, error) {
 	return u.getUser("email", email)
 }

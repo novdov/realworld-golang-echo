@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/novdov/realworld-golang-echo/domain"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type userService struct {
@@ -16,6 +17,10 @@ func NewUserService(ur domain.UserRepository) domain.UserService {
 
 func (u *userService) Save(user *domain.User) error {
 	return u.repo.Save(user)
+}
+
+func (u *userService) GetByID(id primitive.ObjectID) (*domain.User, error) {
+	return u.repo.GetByID(id)
 }
 
 func (u *userService) GetByEmail(email string) (*domain.User, error) {
