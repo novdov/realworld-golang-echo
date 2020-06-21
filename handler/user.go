@@ -93,9 +93,12 @@ func (h *UserHandler) GetCurrentUser(c echo.Context) error {
 }
 
 func getIDFromToken(c echo.Context) primitive.ObjectID {
-	id, ok := c.Get("user").(primitive.ObjectID)
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	idStr, ok := claims["id"].(string)
 	if !ok {
 		return primitive.NilObjectID
 	}
+	id, _ := primitive.ObjectIDFromHex(idStr)
 	return id
 }
