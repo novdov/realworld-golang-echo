@@ -14,6 +14,10 @@ func NewUserService(ur domain.UserRepository) domain.UserService {
 	}
 }
 
+func (u *userService) Save(user *domain.User) error {
+	return u.repo.Save(user)
+}
+
 func (u *userService) GetByEmail(email string) (*domain.User, error) {
 	return u.repo.GetByEmail(email)
 }
