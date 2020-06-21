@@ -40,6 +40,7 @@ type UserRepository interface {
 	GetByID(id primitive.ObjectID) (*User, error)
 	GetByEmail(email string) (*User, error)
 	GetByUsername(username string) (*User, error)
+	Update(*User) error
 }
 
 type UserService interface {
@@ -47,4 +48,5 @@ type UserService interface {
 	GetByID(id primitive.ObjectID) (*User, error)
 	GetByEmail(email string) (*User, error)
 	GetByUsername(username string) (*User, error)
+	Update(*User) error
 }

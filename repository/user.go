@@ -36,6 +36,22 @@ func (u *userRepository) Save(user *domain.User) error {
 	return nil
 }
 
+func (u *userRepository) Update(user *domain.User) error {
+	doc, err := toDocument(user)
+	if err != nil {
+		return err
+	}
+	_, err = u.collection().UpdateOne(
+		context.TODO(),
+		bson.D{{"_id", user.ID}},
+		bson.D{{"$set", doc}},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u *userRepository) GetByID(id primitive.ObjectID) (*domain.User, error) {
 	return u.getUser("_id", id)
 }
@@ -62,4 +78,16 @@ func (u *userRepository) getUser(key string, value interface{}) (*domain.User, e
 		return nil, err
 	}
 	return &user, nil
+}
+
+func toDocument(v interface{}) (bson.D, error) {
+	data, err := bson.Marshal(v)
+	if err != nil {
+		return nil, err
+	}
+	var doc bson.D
+	if err = bson.Unmarshal(data, &doc); err != nil {
+		return nil, err
+	}
+	return doc, nil
 }
