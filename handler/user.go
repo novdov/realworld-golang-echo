@@ -1,12 +1,14 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/novdov/realworld-golang-echo/domain"
 	"github.com/novdov/realworld-golang-echo/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserHandler struct {
@@ -26,6 +28,9 @@ func (h *UserHandler) Register(g *echo.Group) {
 	auth := g.Group("/users")
 	auth.POST("", h.Signup)
 	auth.POST("/login", h.Login)
+
+	user := g.Group("/user", jwtMiddleware)
+	user.GET("", h.GetCurrentUser)
 }
 
 func (h *UserHandler) Signup(c echo.Context) error {
@@ -72,4 +77,25 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, NotFound())
 	}
 	return c.JSON(http.StatusOK, newProfileResponse(u))
+}
+
+func (h *UserHandler) GetCurrentUser(c echo.Context) error {
+	log.Println(primitive.NilObjectID)
+	id := getIDFromToken(c)
+	u, err := h.userService.GetByID(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, NewError(err))
+	}
+	if u == nil {
+		return c.JSON(http.StatusNotFound, NotFound())
+	}
+	return c.JSON(http.StatusOK, newUserResponse(u))
+}
+
+func getIDFromToken(c echo.Context) primitive.ObjectID {
+	id, ok := c.Get("user").(primitive.ObjectID)
+	if !ok {
+		return primitive.NilObjectID
+	}
+	return id
 }
