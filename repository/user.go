@@ -24,6 +24,14 @@ func NewUserRepository(db *mongo.Database, collectionName string) domain.UserRep
 	}
 }
 
+func (u *userRepository) Save(user *domain.User) error {
+	_, err := u.collection().InsertOne(context.TODO(), user)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u *userRepository) GetByEmail(email string) (*domain.User, error) {
 	return u.getUser("email", email)
 }
