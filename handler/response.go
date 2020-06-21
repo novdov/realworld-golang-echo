@@ -3,6 +3,7 @@ package handler
 import (
 	"github.com/labstack/echo/v4"
 	"github.com/novdov/realworld-golang-echo/domain"
+	"github.com/novdov/realworld-golang-echo/utils"
 )
 
 type profileResponse struct {
@@ -39,6 +40,7 @@ func newUserResponse(user *domain.User) *userResponse {
 	resp.User.Email = user.Email
 	resp.User.Bio = user.Bio
 	resp.User.Image = user.Image
+	resp.User.Token, _ = utils.GenerateJWT(user.Email, user.ID)
 	return resp
 }
 
@@ -62,5 +64,12 @@ func NotFound() ResponseError {
 	e := ResponseError{}
 	e.Errors = make(map[string]interface{})
 	e.Errors["body"] = "resource not found"
+	return e
+}
+
+func AccessForbidden() ResponseError {
+	e := ResponseError{}
+	e.Errors = make(map[string]interface{})
+	e.Errors["body"] = "access forbidden"
 	return e
 }
