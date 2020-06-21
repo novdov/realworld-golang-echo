@@ -5,6 +5,7 @@ import (
 
 	"github.com/novdov/realworld-golang-echo/domain"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -25,6 +26,9 @@ func NewUserRepository(db *mongo.Database, collectionName string) domain.UserRep
 }
 
 func (u *userRepository) Save(user *domain.User) error {
+	if user.ID == primitive.NilObjectID {
+		user.ID = primitive.NewObjectID()
+	}
 	_, err := u.collection().InsertOne(context.TODO(), user)
 	if err != nil {
 		return err
