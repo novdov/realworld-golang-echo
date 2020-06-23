@@ -64,6 +64,22 @@ func (u *userRepository) GetByUsername(username string) (*domain.User, error) {
 	return u.getUser("username", username)
 }
 
+func (u *userRepository) FollowUser(user *domain.User, followerID primitive.ObjectID) error {
+	var exists bool
+	for _, followedID := range user.Follows {
+		if followedID == followerID {
+			exists = true
+		}
+	}
+	if !exists {
+		user.Follows = append(user.Follows, followerID)
+	}
+	if err := u.Update(user); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (u *userRepository) getUser(key string, value interface{}) (*domain.User, error) {
 	result := u.collection().FindOne(
 		context.TODO(),

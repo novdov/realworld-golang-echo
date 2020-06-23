@@ -34,3 +34,7 @@ func (u *userService) GetByEmail(email string) (*domain.User, error) {
 func (u *userService) GetByUsername(username string) (*domain.User, error) {
 	return u.repo.GetByUsername(username)
 }
+
+func (u *userService) FollowUser(user *domain.User, followerID primitive.ObjectID) error {
+	return u.repo.FollowUser(user, followerID)
+}
