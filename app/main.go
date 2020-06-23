@@ -10,9 +10,9 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/novdov/realworld-golang-echo/handler"
-	"github.com/novdov/realworld-golang-echo/repository"
 	"github.com/novdov/realworld-golang-echo/router"
 	"github.com/novdov/realworld-golang-echo/service"
+	"github.com/novdov/realworld-golang-echo/user"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -38,7 +38,7 @@ func main() {
 
 	defer client.Disconnect(context.TODO())
 
-	userRepo := repository.NewUserRepository(client.Database("real-world"), "user")
+	userRepo := user.NewUserRepository(client.Database("real-world"), "user")
 	userService := service.NewUserService(userRepo)
 
 	r := router.NewRouter()
