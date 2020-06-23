@@ -7,6 +7,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/novdov/realworld-golang-echo/domain"
+	"github.com/novdov/realworld-golang-echo/errors"
 	"github.com/novdov/realworld-golang-echo/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -41,10 +42,10 @@ func (h *Handler) Signup(c echo.Context) error {
 	req := &userRegisterRequest{}
 
 	if err := req.bind(c, &u); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
+		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
 	}
 	if err := h.userService.Save(&u); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
+		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
 	}
 	return c.JSON(http.StatusCreated, newUserResponse(&u))
 }
@@ -52,19 +53,19 @@ func (h *Handler) Signup(c echo.Context) error {
 func (h *Handler) Login(c echo.Context) error {
 	req := &userLoginRequest{}
 	if err := req.bind(c); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
+		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
 	}
 
 	u, err := h.userService.GetByEmail(req.User.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, NewError(err))
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
 	}
 	if u == nil {
-		return c.JSON(http.StatusForbidden, AccessForbidden())
+		return c.JSON(http.StatusForbidden, errors.NewError(errors.NotFound))
 	}
 
 	if !u.CheckPassword(req.User.Password) {
-		return c.JSON(http.StatusForbidden, AccessForbidden())
+		return c.JSON(http.StatusForbidden, errors.NewError(errors.AccessForbidden))
 	}
 
 	return c.JSON(http.StatusOK, newUserResponse(u))
@@ -74,10 +75,10 @@ func (h *Handler) GetProfile(c echo.Context) error {
 	username := c.Param("username")
 	u, err := h.userService.GetByUsername(username)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, NewError(err))
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
 	}
 	if u == nil {
-		return c.JSON(http.StatusNotFound, NotFound())
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
 	}
 	return c.JSON(http.StatusOK, newProfileResponse(u))
 }
@@ -86,10 +87,10 @@ func (h *Handler) GetCurrentUser(c echo.Context) error {
 	id := getIDFromToken(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, NewError(err))
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
 	}
 	if u == nil {
-		return c.JSON(http.StatusNotFound, NotFound())
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
 	}
 	return c.JSON(http.StatusOK, newUserResponse(u))
 }
@@ -98,18 +99,18 @@ func (h *Handler) UpdateUser(c echo.Context) error {
 	id := getIDFromToken(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, NewError(err))
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
 	}
 	if u == nil {
-		return c.JSON(http.StatusNotFound, NotFound())
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
 	}
 
 	req := &userUpdateRequest{}
 	if err := req.bind(c, u); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
+		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
 	}
 	if err := h.userService.Update(u); err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
+		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
 	}
 	return c.JSON(http.StatusOK, newUserResponse(u))
 }
@@ -118,24 +119,24 @@ func (h *Handler) Follow(c echo.Context) error {
 	id := getIDFromToken(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, NewError(err))
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
 	}
 	if u == nil {
-		return c.JSON(http.StatusNotFound, NotFound())
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
 	}
 
 	username := c.Param("username")
 	follower, err := h.userService.GetByUsername(username)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, NewError(err))
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
 	}
 	if follower == nil {
-		return c.JSON(http.StatusNotFound, NotFound())
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
 	}
 
 	err = h.userService.FollowUser(u, follower.ID)
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
+		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
 	}
 	return c.JSON(http.StatusOK, newProfileResponse(u))
 }
@@ -144,24 +145,24 @@ func (h *Handler) UnFollow(c echo.Context) error {
 	id := getIDFromToken(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, NewError(err))
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
 	}
 	if u == nil {
-		return c.JSON(http.StatusNotFound, NotFound())
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
 	}
 
 	username := c.Param("username")
 	follower, err := h.userService.GetByUsername(username)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, NewError(err))
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
 	}
 	if follower == nil {
-		return c.JSON(http.StatusNotFound, NotFound())
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
 	}
 
 	err = h.userService.UnFollowUser(u, follower.ID)
 	if err != nil {
-		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
+		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
 	}
 	return c.JSON(http.StatusOK, newProfileResponse(u))
 }
