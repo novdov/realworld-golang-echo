@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -143,7 +142,6 @@ func (h *UserHandler) Follow(c echo.Context) error {
 
 func (h *UserHandler) UnFollow(c echo.Context) error {
 	id := getIDFromToken(c)
-	log.Println(id)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, NewError(err))
