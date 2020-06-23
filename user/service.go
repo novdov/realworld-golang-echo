@@ -1,4 +1,4 @@
-package service
+package user
 
 import (
 	"github.com/novdov/realworld-golang-echo/domain"
