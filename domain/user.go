@@ -8,18 +8,17 @@ import (
 )
 
 type User struct {
-	ID         primitive.ObjectID `bson:"_id"`
-	Username   string
-	Email      string
-	Password   string
-	Bio        string
-	Image      string
-	Followers  []User
-	Followings []User
+	ID       primitive.ObjectID `bson:"_id"`
+	Username string
+	Email    string
+	Password string
+	Bio      string
+	Image    string
+	Follows  []primitive.ObjectID
 }
 
 func (u *User) Following() bool {
-	return len(u.Followings) > 0
+	return len(u.Follows) > 0
 }
 
 func (u *User) HashPassword(plain string) (string, error) {
@@ -37,16 +36,20 @@ func (u *User) CheckPassword(plain string) bool {
 
 type UserRepository interface {
 	Save(*User) error
-	GetByID(id primitive.ObjectID) (*User, error)
-	GetByEmail(email string) (*User, error)
-	GetByUsername(username string) (*User, error)
+	GetByID(primitive.ObjectID) (*User, error)
+	GetByEmail(string) (*User, error)
+	GetByUsername(string) (*User, error)
 	Update(*User) error
+	FollowUser(*User, primitive.ObjectID) error
+	UnFollowUser(*User, primitive.ObjectID) error
 }
 
 type UserService interface {
 	Save(*User) error
-	GetByID(id primitive.ObjectID) (*User, error)
-	GetByEmail(email string) (*User, error)
-	GetByUsername(username string) (*User, error)
+	GetByID(primitive.ObjectID) (*User, error)
+	GetByEmail(string) (*User, error)
+	GetByUsername(string) (*User, error)
 	Update(*User) error
+	FollowUser(*User, primitive.ObjectID) error
+	UnFollowUser(*User, primitive.ObjectID) error
 }

@@ -64,6 +64,33 @@ func (u *userRepository) GetByUsername(username string) (*domain.User, error) {
 	return u.getUser("username", username)
 }
 
+func (u *userRepository) FollowUser(user *domain.User, followerID primitive.ObjectID) error {
+	var exists bool
+	for _, followedID := range user.Follows {
+		if followedID == followerID {
+			exists = true
+		}
+	}
+	if !exists {
+		user.Follows = append(user.Follows, followerID)
+	}
+	return u.Update(user)
+}
+
+func (u *userRepository) UnFollowUser(user *domain.User, followerID primitive.ObjectID) error {
+	notFound := -1
+	idx := notFound
+	for i, followedID := range user.Follows {
+		if followedID == followerID {
+			idx = i
+		}
+	}
+	if idx > notFound {
+		user.Follows = append(user.Follows[:idx], user.Follows[(idx+1):]...)
+	}
+	return u.Update(user)
+}
+
 func (u *userRepository) getUser(key string, value interface{}) (*domain.User, error) {
 	result := u.collection().FindOne(
 		context.TODO(),
