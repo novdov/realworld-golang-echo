@@ -74,10 +74,21 @@ func (u *userRepository) FollowUser(user *domain.User, followerID primitive.Obje
 	if !exists {
 		user.Follows = append(user.Follows, followerID)
 	}
-	if err := u.Update(user); err != nil {
-		return err
+	return u.Update(user)
+}
+
+func (u *userRepository) UnFollowUser(user *domain.User, followerID primitive.ObjectID) error {
+	notFound := -1
+	idx := notFound
+	for i, followedID := range user.Follows {
+		if followedID == followerID {
+			idx = i
+		}
 	}
-	return nil
+	if idx > notFound {
+		user.Follows = append(user.Follows[:idx], user.Follows[(idx+1):]...)
+	}
+	return u.Update(user)
 }
 
 func (u *userRepository) getUser(key string, value interface{}) (*domain.User, error) {

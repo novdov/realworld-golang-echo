@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go"
@@ -25,6 +26,7 @@ func (h *UserHandler) Register(g *echo.Group) {
 	profile := g.Group("/profiles", jwtMiddleware)
 	profile.GET("/:username", h.GetProfile)
 	profile.POST("/:username/follow", h.Follow)
+	profile.DELETE("/:username/follow", h.UnFollow)
 
 	auth := g.Group("/users")
 	auth.POST("", h.Signup)
@@ -133,6 +135,33 @@ func (h *UserHandler) Follow(c echo.Context) error {
 	}
 
 	err = h.userService.FollowUser(u, follower.ID)
+	if err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
+	}
+	return c.JSON(http.StatusOK, newProfileResponse(u))
+}
+
+func (h *UserHandler) UnFollow(c echo.Context) error {
+	id := getIDFromToken(c)
+	log.Println(id)
+	u, err := h.userService.GetByID(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, NewError(err))
+	}
+	if u == nil {
+		return c.JSON(http.StatusNotFound, NotFound())
+	}
+
+	username := c.Param("username")
+	follower, err := h.userService.GetByUsername(username)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, NewError(err))
+	}
+	if follower == nil {
+		return c.JSON(http.StatusNotFound, NotFound())
+	}
+
+	err = h.userService.UnFollowUser(u, follower.ID)
 	if err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
 	}

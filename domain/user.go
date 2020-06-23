@@ -41,6 +41,7 @@ type UserRepository interface {
 	GetByUsername(string) (*User, error)
 	Update(*User) error
 	FollowUser(*User, primitive.ObjectID) error
+	UnFollowUser(*User, primitive.ObjectID) error
 }
 
 type UserService interface {
@@ -50,4 +51,5 @@ type UserService interface {
 	GetByUsername(string) (*User, error)
 	Update(*User) error
 	FollowUser(*User, primitive.ObjectID) error
+	UnFollowUser(*User, primitive.ObjectID) error
 }
