@@ -1,4 +1,4 @@
-package handler
+package user
 
 import (
 	"net/http"
@@ -11,15 +11,15 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type UserHandler struct {
+type Handler struct {
 	userService domain.UserService
 }
 
-func NewUserHandler(us domain.UserService) *UserHandler {
-	return &UserHandler{userService: us}
+func NewHandler(us domain.UserService) *Handler {
+	return &Handler{userService: us}
 }
 
-func (h *UserHandler) Register(g *echo.Group) {
+func (h *Handler) Register(g *echo.Group) {
 	jwtMiddleware := middleware.JWT(utils.JWTSecret)
 
 	profile := g.Group("/profiles", jwtMiddleware)
@@ -36,7 +36,7 @@ func (h *UserHandler) Register(g *echo.Group) {
 	user.PUT("", h.UpdateUser)
 }
 
-func (h *UserHandler) Signup(c echo.Context) error {
+func (h *Handler) Signup(c echo.Context) error {
 	var u domain.User
 	req := &userRegisterRequest{}
 
@@ -49,7 +49,7 @@ func (h *UserHandler) Signup(c echo.Context) error {
 	return c.JSON(http.StatusCreated, newUserResponse(&u))
 }
 
-func (h *UserHandler) Login(c echo.Context) error {
+func (h *Handler) Login(c echo.Context) error {
 	req := &userLoginRequest{}
 	if err := req.bind(c); err != nil {
 		return c.JSON(http.StatusUnprocessableEntity, NewError(err))
@@ -70,7 +70,7 @@ func (h *UserHandler) Login(c echo.Context) error {
 	return c.JSON(http.StatusOK, newUserResponse(u))
 }
 
-func (h *UserHandler) GetProfile(c echo.Context) error {
+func (h *Handler) GetProfile(c echo.Context) error {
 	username := c.Param("username")
 	u, err := h.userService.GetByUsername(username)
 	if err != nil {
@@ -82,7 +82,7 @@ func (h *UserHandler) GetProfile(c echo.Context) error {
 	return c.JSON(http.StatusOK, newProfileResponse(u))
 }
 
-func (h *UserHandler) GetCurrentUser(c echo.Context) error {
+func (h *Handler) GetCurrentUser(c echo.Context) error {
 	id := getIDFromToken(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
@@ -94,7 +94,7 @@ func (h *UserHandler) GetCurrentUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, newUserResponse(u))
 }
 
-func (h *UserHandler) UpdateUser(c echo.Context) error {
+func (h *Handler) UpdateUser(c echo.Context) error {
 	id := getIDFromToken(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
@@ -114,7 +114,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, newUserResponse(u))
 }
 
-func (h *UserHandler) Follow(c echo.Context) error {
+func (h *Handler) Follow(c echo.Context) error {
 	id := getIDFromToken(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
@@ -140,7 +140,7 @@ func (h *UserHandler) Follow(c echo.Context) error {
 	return c.JSON(http.StatusOK, newProfileResponse(u))
 }
 
-func (h *UserHandler) UnFollow(c echo.Context) error {
+func (h *Handler) UnFollow(c echo.Context) error {
 	id := getIDFromToken(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
