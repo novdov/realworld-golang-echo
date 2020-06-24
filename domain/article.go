@@ -26,3 +26,14 @@ type Comment struct {
 	Body      string             `bson:"body"`
 	Author    primitive.ObjectID `bson:"author"`
 }
+
+type ArticleRepository interface {
+	ListByTag(tag string) ([]*Article, error)
+	ListByAuthor(username string) ([]*Article, error)
+	ListByLimit(limit int) ([]*Article, error)
+	ListByOffset(offset int) ([]*Article, error)
+	GetBySlug(slug string) (*Article, error)
+	Save(article *Article) error
+	Update(article *Article) error
+	Delete(article *Article) error
+}
