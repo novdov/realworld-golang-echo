@@ -26,6 +26,10 @@ func NewArticleRepository(db *mongo.Database, collectionName string) domain.Arti
 	}
 }
 
+func (a *articleRepository) GetBySlug(slug string) (*domain.Article, error) {
+	return a.getArticle("slug", slug)
+}
+
 func (a *articleRepository) Save(article *domain.Article) error {
 	if article.ID == primitive.NilObjectID {
 		article.ID = primitive.NewObjectID()
@@ -63,4 +67,20 @@ func (a *articleRepository) Delete(article *domain.Article) error {
 		return err
 	}
 	return nil
+}
+
+func (a *articleRepository) getArticle(key string, value interface{}) (*domain.Article, error) {
+	result := a.collection().FindOne(
+		context.TODO(),
+		bson.D{{key, value}},
+	)
+
+	var article domain.Article
+	if err := result.Decode(&article); err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &article, nil
 }
