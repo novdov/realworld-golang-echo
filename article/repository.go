@@ -53,3 +53,14 @@ func (a *articleRepository) Update(article *domain.Article) error {
 	}
 	return nil
 }
+
+func (a *articleRepository) Delete(article *domain.Article) error {
+	_, err := a.collection().DeleteOne(
+		context.TODO(),
+		bson.D{{"_id", article.ID}},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
