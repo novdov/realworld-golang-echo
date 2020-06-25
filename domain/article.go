@@ -35,10 +35,7 @@ type Comment struct {
 }
 
 type ArticleRepository interface {
-	ListByTag(tag string) ([]*Article, error)
-	ListByAuthor(username string) ([]*Article, error)
-	ListByLimit(limit int) ([]*Article, error)
-	ListByOffset(offset int) ([]*Article, error)
+	Find(query map[string]string, skip int64, limit int64) ([]*Article, error)
 	GetBySlug(slug string) (*Article, error)
 	Save(article *Article) error
 	Update(article *Article) error
