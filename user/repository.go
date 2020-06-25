@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/novdov/realworld-golang-echo/domain"
+	"github.com/novdov/realworld-golang-echo/utils"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -37,7 +38,7 @@ func (u *userRepository) Save(user *domain.User) error {
 }
 
 func (u *userRepository) Update(user *domain.User) error {
-	doc, err := toDocument(user)
+	doc, err := utils.ToDocument(user)
 	if err != nil {
 		return err
 	}
@@ -105,16 +106,4 @@ func (u *userRepository) getUser(key string, value interface{}) (*domain.User, e
 		return nil, err
 	}
 	return &user, nil
-}
-
-func toDocument(v interface{}) (bson.D, error) {
-	data, err := bson.Marshal(v)
-	if err != nil {
-		return nil, err
-	}
-	var doc bson.D
-	if err = bson.Unmarshal(data, &doc); err != nil {
-		return nil, err
-	}
-	return doc, nil
 }
