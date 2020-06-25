@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"strings"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -17,6 +18,12 @@ type Article struct {
 	UpdatedAt   time.Time            `bson:"updatedAt"`
 	Author      primitive.ObjectID   `bson:"author"`
 	Favorites   []primitive.ObjectID `bson:"favorites"`
+}
+
+func (a *Article) UpdateSlug() {
+	title := strings.ToLower(a.Title)
+	titleSplit := strings.Split(title, " ")
+	a.Slug = strings.Join(titleSplit, "-")
 }
 
 type Comment struct {
