@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type articleRepository struct {
@@ -24,6 +25,38 @@ func NewArticleRepository(db *mongo.Database, collectionName string) domain.Arti
 		db:             db,
 		collectionName: collectionName,
 	}
+}
+
+func (a *articleRepository) Find(query map[string]string, skip int64, limit int64) ([]*domain.Article, error) {
+	var result []*domain.Article
+
+	var bsonFilter = bson.D{}
+	for key, value := range query {
+		bsonFilter = append(bsonFilter, bson.E{Key: key, Value: value})
+	}
+
+	cur, err := a.collection().Find(
+		context.TODO(),
+		bsonFilter,
+		getFindOptions(skip, limit),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	for cur.Next(context.TODO()) {
+		var article *domain.Article
+		err := cur.Decode(&article)
+		if err != nil {
+			return nil, err
+		}
+		result = append(result, article)
+	}
+	if err := cur.Err(); err != nil {
+		return nil, err
+	}
+	cur.Close(context.TODO())
+	return result, nil
 }
 
 func (a *articleRepository) GetBySlug(slug string) (*domain.Article, error) {
@@ -83,4 +116,15 @@ func (a *articleRepository) getArticle(key string, value interface{}) (*domain.A
 		return nil, err
 	}
 	return &article, nil
+}
+
+func getFindOptions(skip int64, limit int64) *options.FindOptions {
+	opts := &options.FindOptions{}
+	if skip != 0 {
+		opts.Skip = &skip
+	}
+	if limit != 0 {
+		opts.Limit = &limit
+	}
+	return opts
 }
