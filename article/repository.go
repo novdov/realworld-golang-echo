@@ -2,6 +2,7 @@ package article
 
 import (
 	"context"
+	"time"
 
 	"github.com/novdov/realworld-golang-echo/domain"
 	"github.com/novdov/realworld-golang-echo/utils"
@@ -67,6 +68,11 @@ func (a *articleRepository) Save(article *domain.Article) error {
 	if article.ID == primitive.NilObjectID {
 		article.ID = primitive.NewObjectID()
 	}
+	if article.CreatedAt.IsZero() {
+		article.CreatedAt = currentTime()
+	}
+	article.UpdatedAt = currentTime()
+	article.UpdateSlug()
 
 	_, err := a.collection().InsertOne(context.TODO(), article)
 	if err != nil {
@@ -127,4 +133,8 @@ func getFindOptions(skip int64, limit int64) *options.FindOptions {
 		opts.Limit = &limit
 	}
 	return opts
+}
+
+func currentTime() time.Time {
+	return time.Now().Local()
 }
