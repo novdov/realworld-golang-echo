@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/novdov/realworld-golang-echo/article"
 	"github.com/novdov/realworld-golang-echo/router"
 	"github.com/novdov/realworld-golang-echo/user"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -36,14 +37,20 @@ func main() {
 
 	defer client.Disconnect(context.TODO())
 
-	userRepo := user.NewUserRepository(client.Database("real-world"), "user")
+	db := client.Database("real-world")
+
+	userRepo := user.NewUserRepository(db, "user")
 	userService := user.NewUserService(userRepo)
+	articleRepo := article.NewArticleRepository(db, "article")
+	articleService := article.NewArticleService(articleRepo)
 
 	r := router.NewRouter()
 	g := r.Group("/api")
 
 	userHandler := user.NewHandler(userService)
 	userHandler.Register(g)
+	articleHandler := article.NewHandler(articleService, userService)
+	articleHandler.Register(g)
 
 	r.Logger.Fatal(r.Start(":8000"))
 }
