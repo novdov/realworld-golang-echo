@@ -8,7 +8,7 @@ import (
 type articleCreateRequest struct {
 	Article struct {
 		Title       string   `json:"title" validate:"required"`
-		Description string   `json:"description" validate:"description"`
+		Description string   `json:"description" validate:"required"`
 		Body        string   `json:"body" validate:"required"`
 		TagList     []string `json:"tagList"`
 	} `json:"article"`
