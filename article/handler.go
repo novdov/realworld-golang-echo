@@ -10,6 +10,7 @@ import (
 
 type Handler struct {
 	articleService domain.ArticleService
+	userService    domain.UserService
 }
 
 func NewHandler(as domain.ArticleService) *Handler {
