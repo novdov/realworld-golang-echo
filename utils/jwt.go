@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/labstack/echo/v4"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -29,4 +30,15 @@ func GenerateJWT(email string, id primitive.ObjectID) (string, error) {
 		return "", err
 	}
 	return t, nil
+}
+
+func GetUserIDFromJWT(c echo.Context) primitive.ObjectID {
+	user := c.Get("user").(*jwt.Token)
+	claims := user.Claims.(jwt.MapClaims)
+	idStr, ok := claims["id"].(string)
+	if !ok {
+		return primitive.NilObjectID
+	}
+	id, _ := primitive.ObjectIDFromHex(idStr)
+	return id
 }

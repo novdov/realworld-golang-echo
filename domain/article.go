@@ -41,3 +41,7 @@ type ArticleRepository interface {
 	Update(article *Article) error
 	Delete(article *Article) error
 }
+
+type ArticleService interface {
+	Save(article *Article) error
+}
