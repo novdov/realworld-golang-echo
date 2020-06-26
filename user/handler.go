@@ -3,13 +3,11 @@ package user
 import (
 	"net/http"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/novdov/realworld-golang-echo/domain"
 	"github.com/novdov/realworld-golang-echo/errors"
 	"github.com/novdov/realworld-golang-echo/utils"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Handler struct {
@@ -84,7 +82,7 @@ func (h *Handler) GetProfile(c echo.Context) error {
 }
 
 func (h *Handler) GetCurrentUser(c echo.Context) error {
-	id := getIDFromToken(c)
+	id := utils.GetUserIDFromJWT(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
@@ -96,7 +94,7 @@ func (h *Handler) GetCurrentUser(c echo.Context) error {
 }
 
 func (h *Handler) UpdateUser(c echo.Context) error {
-	id := getIDFromToken(c)
+	id := utils.GetUserIDFromJWT(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
@@ -116,7 +114,7 @@ func (h *Handler) UpdateUser(c echo.Context) error {
 }
 
 func (h *Handler) Follow(c echo.Context) error {
-	id := getIDFromToken(c)
+	id := utils.GetUserIDFromJWT(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
@@ -142,7 +140,7 @@ func (h *Handler) Follow(c echo.Context) error {
 }
 
 func (h *Handler) UnFollow(c echo.Context) error {
-	id := getIDFromToken(c)
+	id := utils.GetUserIDFromJWT(c)
 	u, err := h.userService.GetByID(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
@@ -165,15 +163,4 @@ func (h *Handler) UnFollow(c echo.Context) error {
 		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
 	}
 	return c.JSON(http.StatusOK, newProfileResponse(u))
-}
-
-func getIDFromToken(c echo.Context) primitive.ObjectID {
-	user := c.Get("user").(*jwt.Token)
-	claims := user.Claims.(jwt.MapClaims)
-	idStr, ok := claims["id"].(string)
-	if !ok {
-		return primitive.NilObjectID
-	}
-	id, _ := primitive.ObjectIDFromHex(idStr)
-	return id
 }
