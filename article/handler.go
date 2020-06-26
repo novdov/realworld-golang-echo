@@ -6,6 +6,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"github.com/novdov/realworld-golang-echo/domain"
 	"github.com/novdov/realworld-golang-echo/errors"
+	"github.com/novdov/realworld-golang-echo/utils"
 )
 
 type Handler struct {
@@ -18,7 +19,9 @@ func NewHandler(as domain.ArticleService) *Handler {
 }
 
 func (h *Handler) Create(c echo.Context) error {
-	var article domain.Article
+	article := domain.Article{
+		Author: utils.GetUserIDFromJWT(c),
+	}
 	req := &articleCreateRequest{}
 
 	if err := req.bind(c, &article); err != nil {
