@@ -23,3 +23,7 @@ func (a *articleService) GetBySlug(slug string) (*domain.Article, error) {
 func (a *articleService) Update(article *domain.Article) error {
 	return a.repo.Update(article)
 }
+
+func (a *articleService) Delete(article *domain.Article) error {
+	return a.repo.Delete(article)
+}

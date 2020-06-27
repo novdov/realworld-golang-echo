@@ -45,5 +45,6 @@ type ArticleRepository interface {
 type ArticleService interface {
 	Save(article *Article) error
 	Update(article *Article) error
+	Delete(article *Article) error
 	GetBySlug(slug string) (*Article, error)
 }
