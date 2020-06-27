@@ -24,6 +24,7 @@ func (h *Handler) Register(g *echo.Group) {
 
 	article := g.Group("/articles", jwtMiddleware)
 	article.POST("", h.Create)
+	article.GET("/:slug", h.GetSingleArticle)
 }
 
 func (h *Handler) Create(c echo.Context) error {
@@ -47,4 +48,25 @@ func (h *Handler) Create(c echo.Context) error {
 		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
 	}
 	return c.JSON(http.StatusCreated, newSingleArticleResponse(article, user))
+}
+
+func (h *Handler) GetSingleArticle(c echo.Context) error {
+	slug := c.Param("slug")
+	article, err := h.articleService.GetBySlug(slug)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+	}
+	if article == nil {
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
+	}
+
+	user, err := h.userService.GetByID(article.Author)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+	}
+	if user == nil {
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
+	}
+
+	return c.JSON(http.StatusOK, newSingleArticleResponse(article, user))
 }

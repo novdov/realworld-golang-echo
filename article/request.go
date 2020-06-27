@@ -28,3 +28,26 @@ func (a *articleCreateRequest) bind(c echo.Context, article *domain.Article) err
 	article.TagList = a.Article.TagList
 	return nil
 }
+
+type articleUpdateRequest struct {
+	Article struct {
+		Title       string `json:"title"`
+		Description string `json:"description"`
+		Body        string `json:"body"`
+	} `json:"article"`
+}
+
+func (a *articleUpdateRequest) bind(c echo.Context, article domain.Article) error {
+	if err := c.Bind(a); err != nil {
+		return err
+	}
+	if err := c.Validate(a); err != nil {
+		return err
+	}
+
+	article.Title = a.Article.Title
+	article.Description = a.Article.Description
+	article.Body = a.Article.Body
+	article.UpdateSlug()
+	return nil
+}
