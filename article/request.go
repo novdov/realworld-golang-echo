@@ -37,7 +37,7 @@ type articleUpdateRequest struct {
 	} `json:"article"`
 }
 
-func (a *articleUpdateRequest) bind(c echo.Context, article domain.Article) error {
+func (a *articleUpdateRequest) bind(c echo.Context, article *domain.Article) error {
 	if err := c.Bind(a); err != nil {
 		return err
 	}
@@ -45,9 +45,19 @@ func (a *articleUpdateRequest) bind(c echo.Context, article domain.Article) erro
 		return err
 	}
 
-	article.Title = a.Article.Title
-	article.Description = a.Article.Description
-	article.Body = a.Article.Body
-	article.UpdateSlug()
+	if a.Article.Title != article.Title {
+		article.Title = a.Article.Title
+		article.UpdateSlug()
+	}
+
+	if a.Article.Description != article.Description {
+		article.Description = a.Article.Description
+	}
+
+	if a.Article.Body != article.Body {
+		article.Body = a.Article.Body
+	}
+
+	article.UpdatedAt = currentTime()
 	return nil
 }
