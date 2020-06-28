@@ -108,6 +108,20 @@ func (a *articleRepository) Delete(article *domain.Article) error {
 	return nil
 }
 
+func (a *articleRepository) GetTags() ([]interface{}, error) {
+	result, err := a.collection().Distinct(
+		context.TODO(),
+		"tagList",
+		bson.D{{}},
+		options.Distinct().SetMaxTime(10*time.Second),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
 func (a *articleRepository) getArticle(key string, value interface{}) (*domain.Article, error) {
 	result := a.collection().FindOne(
 		context.TODO(),
