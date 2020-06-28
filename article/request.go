@@ -61,3 +61,26 @@ func (a *articleUpdateRequest) bind(c echo.Context, article *domain.Article) err
 	article.UpdatedAt = currentTime()
 	return nil
 }
+
+type commentsCreateRequest struct {
+	Comment struct {
+		Body string `json:"body"`
+	} `json:"comment"`
+}
+
+func (r *commentsCreateRequest) bind(c echo.Context, comment *domain.Comment, user *domain.User) error {
+	if err := c.Bind(r); err != nil {
+		return err
+	}
+	if err := c.Validate(r); err != nil {
+		return err
+	}
+
+	comment.Author = user.ID
+	if comment.CreatedAt.IsZero() {
+		comment.CreatedAt = currentTime()
+	}
+	comment.UpdatedAt = currentTime()
+	comment.Body = r.Comment.Body
+	return nil
+}

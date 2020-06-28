@@ -41,3 +41,15 @@ func newSingleArticleResponse(article *domain.Article, user *domain.User) *singl
 	resp.Article.Author.Following = user.Following()
 	return resp
 }
+
+type singleCommentResponse struct {
+	Comment struct {
+		Body string `json:"body"`
+	} `json:"comment"`
+}
+
+func newSingleCommentResponse(comment *domain.Comment) *singleCommentResponse {
+	resp := &singleCommentResponse{}
+	resp.Comment.Body = comment.Body
+	return resp
+}

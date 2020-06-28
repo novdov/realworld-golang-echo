@@ -27,6 +27,7 @@ func (h *Handler) Register(g *echo.Group) {
 	article.GET("/:slug", h.GetSingleArticle)
 	article.PUT("/:slug", h.Update)
 	article.DELETE("/:slug", h.Delete)
+	article.POST("/:slug/comments", h.AddComments)
 
 	tags := g.Group("/tags")
 	tags.GET("", h.GetTags)
@@ -142,4 +143,38 @@ func (h *Handler) GetTags(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
 	}
 	return c.JSON(http.StatusOK, map[string][]interface{}{"tags": tags})
+}
+
+func (h *Handler) AddComments(c echo.Context) error {
+	slug := c.Param("slug")
+	article, err := h.articleService.GetBySlug(slug)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+	}
+	if article == nil {
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
+	}
+
+	user, err := h.userService.GetByID(article.Author)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+	}
+	if user == nil {
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
+	}
+
+	req := &commentsCreateRequest{}
+	var comment domain.Comment
+	if err := req.bind(c, &comment, user); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
+	}
+
+	if err := h.articleService.AddComments(article, &comment); err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+	}
+	if err := h.articleService.Update(article); err != nil {
+		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
+	}
+
+	return c.JSON(http.StatusCreated, newSingleCommentResponse(&comment))
 }

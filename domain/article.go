@@ -18,12 +18,17 @@ type Article struct {
 	UpdatedAt   time.Time            `bson:"updatedAt"`
 	Author      primitive.ObjectID   `bson:"author"`
 	Favorites   []primitive.ObjectID `bson:"favorites"`
+	Comments    []*Comment           `bson:"comments"`
 }
 
 func (a *Article) UpdateSlug() {
 	title := strings.ToLower(a.Title)
 	titleSplit := strings.Split(title, " ")
 	a.Slug = strings.Join(titleSplit, "-")
+}
+
+func (a *Article) AddComments(comment *Comment) {
+	a.Comments = append(a.Comments, comment)
 }
 
 type Comment struct {
@@ -41,6 +46,7 @@ type ArticleRepository interface {
 	Update(article *Article) error
 	Delete(article *Article) error
 	GetTags() ([]interface{}, error)
+	AddComments(article *Article, comment *Comment) error
 }
 
 type ArticleService interface {
@@ -49,4 +55,5 @@ type ArticleService interface {
 	Delete(article *Article) error
 	GetBySlug(slug string) (*Article, error)
 	GetTags() ([]interface{}, error)
+	AddComments(article *Article, comment *Comment) error
 }

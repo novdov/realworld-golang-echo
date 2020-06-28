@@ -31,3 +31,7 @@ func (a *articleService) Delete(article *domain.Article) error {
 func (a *articleService) GetTags() ([]interface{}, error) {
 	return a.repo.GetTags()
 }
+
+func (a *articleService) AddComments(article *domain.Article, comment *domain.Comment) error {
+	return a.repo.AddComments(article, comment)
+}

@@ -122,6 +122,14 @@ func (a *articleRepository) GetTags() ([]interface{}, error) {
 	return result, nil
 }
 
+func (a *articleRepository) AddComments(article *domain.Article, comment *domain.Comment) error {
+	if comment.ID == primitive.NilObjectID {
+		comment.ID = primitive.NewObjectID()
+	}
+	article.AddComments(comment)
+	return a.Update(article)
+}
+
 func (a *articleRepository) getArticle(key string, value interface{}) (*domain.Article, error) {
 	result := a.collection().FindOne(
 		context.TODO(),
