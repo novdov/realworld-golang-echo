@@ -27,6 +27,9 @@ func (h *Handler) Register(g *echo.Group) {
 	article.GET("/:slug", h.GetSingleArticle)
 	article.PUT("/:slug", h.Update)
 	article.DELETE("/:slug", h.Delete)
+
+	tags := g.Group("/tags")
+	tags.GET("", h.GetTags)
 }
 
 func (h *Handler) Create(c echo.Context) error {
@@ -131,4 +134,12 @@ func (h *Handler) Delete(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"result": "deleted article"})
+}
+
+func (h *Handler) GetTags(c echo.Context) error {
+	tags, err := h.articleService.GetTags()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+	}
+	return c.JSON(http.StatusOK, map[string][]string{"tags": tags})
 }

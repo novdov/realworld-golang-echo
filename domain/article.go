@@ -40,6 +40,7 @@ type ArticleRepository interface {
 	Save(article *Article) error
 	Update(article *Article) error
 	Delete(article *Article) error
+	GetTags() ([]string, error)
 }
 
 type ArticleService interface {
@@ -47,4 +48,5 @@ type ArticleService interface {
 	Update(article *Article) error
 	Delete(article *Article) error
 	GetBySlug(slug string) (*Article, error)
+	GetTags() ([]string, error)
 }
