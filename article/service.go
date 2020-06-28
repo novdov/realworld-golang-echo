@@ -28,6 +28,6 @@ func (a *articleService) Delete(article *domain.Article) error {
 	return a.repo.Delete(article)
 }
 
-func (a *articleService) GetTags() ([]string, error) {
+func (a *articleService) GetTags() ([]interface{}, error) {
 	return a.repo.GetTags()
 }

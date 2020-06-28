@@ -141,5 +141,5 @@ func (h *Handler) GetTags(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
 	}
-	return c.JSON(http.StatusOK, map[string][]string{"tags": tags})
+	return c.JSON(http.StatusOK, map[string][]interface{}{"tags": tags})
 }

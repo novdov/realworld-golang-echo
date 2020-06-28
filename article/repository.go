@@ -108,8 +108,8 @@ func (a *articleRepository) Delete(article *domain.Article) error {
 	return nil
 }
 
-func (a *articleRepository) GetTags() ([]string, error) {
-	values, err := a.collection().Distinct(
+func (a *articleRepository) GetTags() ([]interface{}, error) {
+	result, err := a.collection().Distinct(
 		context.TODO(),
 		"tagList",
 		bson.D{{}},
@@ -118,11 +118,6 @@ func (a *articleRepository) GetTags() ([]string, error) {
 
 	if err != nil {
 		return nil, err
-	}
-
-	var result []string
-	for _, res := range values {
-		result = append(result, res.(string))
 	}
 	return result, nil
 }
