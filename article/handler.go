@@ -176,5 +176,5 @@ func (h *Handler) AddComments(c echo.Context) error {
 		return c.JSON(http.StatusUnprocessableEntity, errors.NewError(err))
 	}
 
-	return c.JSON(http.StatusCreated, newSingleCommentResponse(&comment))
+	return c.JSON(http.StatusCreated, newSingleCommentResponse(&comment, user))
 }
