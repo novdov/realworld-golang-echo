@@ -8,6 +8,7 @@ import (
 	"github.com/novdov/realworld-golang-echo/domain"
 	"github.com/novdov/realworld-golang-echo/errors"
 	"github.com/novdov/realworld-golang-echo/utils"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type Handler struct {
@@ -29,6 +30,7 @@ func (h *Handler) Register(g *echo.Group) {
 	article.DELETE("/:slug", h.Delete)
 	article.POST("/:slug/comments", h.AddComments)
 	article.GET("/:slug/comments", h.GetComments)
+	article.DELETE("/:slug/comments/:id", h.DeleteComments)
 
 	tags := g.Group("/tags")
 	tags.GET("", h.GetTags)
@@ -203,4 +205,22 @@ func (h *Handler) GetComments(c echo.Context) error {
 		result = append(result, newSingleCommentResponse(comment, user))
 	}
 	return c.JSON(http.StatusOK, newMultipleCommentsResponse(result))
+}
+
+func (h *Handler) DeleteComments(c echo.Context) error {
+	slug := c.Param("slug")
+	id, _ := primitive.ObjectIDFromHex(c.Param("id"))
+
+	article, err := h.articleService.GetBySlug(slug)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+	}
+	if article == nil {
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
+	}
+
+	if err := h.articleService.DeleteComments(article, id); err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+	}
+	return c.JSON(http.StatusOK, map[string]interface{}{"result": "deleted comment"})
 }

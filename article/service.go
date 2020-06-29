@@ -1,6 +1,9 @@
 package article
 
-import "github.com/novdov/realworld-golang-echo/domain"
+import (
+	"github.com/novdov/realworld-golang-echo/domain"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type articleService struct {
 	repo domain.ArticleRepository
@@ -34,4 +37,8 @@ func (a *articleService) GetTags() ([]interface{}, error) {
 
 func (a *articleService) AddComments(article *domain.Article, comment *domain.Comment) error {
 	return a.repo.AddComments(article, comment)
+}
+
+func (a *articleService) DeleteComments(article *domain.Article, id primitive.ObjectID) error {
+	return a.repo.DeleteComments(article, id)
 }

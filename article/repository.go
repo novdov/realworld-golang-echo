@@ -130,6 +130,22 @@ func (a *articleRepository) AddComments(article *domain.Article, comment *domain
 	return a.Update(article)
 }
 
+func (a *articleRepository) DeleteComments(article *domain.Article, id primitive.ObjectID) error {
+	_, err := a.collection().UpdateOne(
+		context.TODO(),
+		bson.D{{"_id", article.ID}},
+		bson.D{
+			{"$pull", bson.D{
+				{"comments", bson.D{{"_id", id}}}},
+			},
+		},
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (a *articleRepository) getArticle(key string, value interface{}) (*domain.Article, error) {
 	result := a.collection().FindOne(
 		context.TODO(),

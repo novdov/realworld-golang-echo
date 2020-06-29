@@ -47,6 +47,7 @@ type ArticleRepository interface {
 	Delete(article *Article) error
 	GetTags() ([]interface{}, error)
 	AddComments(article *Article, comment *Comment) error
+	DeleteComments(article *Article, id primitive.ObjectID) error
 }
 
 type ArticleService interface {
@@ -56,4 +57,5 @@ type ArticleService interface {
 	GetBySlug(slug string) (*Article, error)
 	GetTags() ([]interface{}, error)
 	AddComments(article *Article, comment *Comment) error
+	DeleteComments(article *Article, id primitive.ObjectID) error
 }
