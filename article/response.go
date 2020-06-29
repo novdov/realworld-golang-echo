@@ -69,3 +69,11 @@ func newSingleCommentResponse(comment *domain.Comment, user *domain.User) *singl
 	resp.Comment.Author.Following = user.Following()
 	return resp
 }
+
+type multipleCommentsResponse struct {
+	Comments []*singleCommentResponse `json:"comments"`
+}
+
+func newMultipleCommentsResponse(comments []*singleCommentResponse) *multipleCommentsResponse {
+	return &multipleCommentsResponse{Comments: comments}
+}

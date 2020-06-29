@@ -28,6 +28,7 @@ func (h *Handler) Register(g *echo.Group) {
 	article.PUT("/:slug", h.Update)
 	article.DELETE("/:slug", h.Delete)
 	article.POST("/:slug/comments", h.AddComments)
+	article.GET("/:slug/comments", h.GetComments)
 
 	tags := g.Group("/tags")
 	tags.GET("", h.GetTags)
@@ -177,4 +178,29 @@ func (h *Handler) AddComments(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusCreated, newSingleCommentResponse(&comment, user))
+}
+
+func (h *Handler) GetComments(c echo.Context) error {
+	slug := c.Param("slug")
+	article, err := h.articleService.GetBySlug(slug)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+	}
+	if article == nil {
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
+	}
+
+	var result []*singleCommentResponse
+	comments := article.Comments
+	for _, comment := range comments {
+		user, err := h.userService.GetByID(comment.Author)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+		}
+		if user == nil {
+			return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
+		}
+		result = append(result, newSingleCommentResponse(comment, user))
+	}
+	return c.JSON(http.StatusOK, newMultipleCommentsResponse(result))
 }
