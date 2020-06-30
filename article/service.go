@@ -15,6 +15,10 @@ func NewArticleService(ar domain.ArticleRepository) domain.ArticleService {
 	}
 }
 
+func (a *articleService) Find(query map[string]string, skip int64, limit int64) ([]*domain.Article, error) {
+	return a.repo.Find(query, skip, limit)
+}
+
 func (a *articleService) Save(article *domain.Article) error {
 	return a.repo.Save(article)
 }

@@ -51,6 +51,7 @@ type ArticleRepository interface {
 }
 
 type ArticleService interface {
+	Find(query map[string]string, skip int64, limit int64) ([]*Article, error)
 	Save(article *Article) error
 	Update(article *Article) error
 	Delete(article *Article) error
