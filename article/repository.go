@@ -33,7 +33,9 @@ func (a *articleRepository) Find(query map[string]string, skip int64, limit int6
 
 	var bsonFilter = bson.D{}
 	for key, value := range query {
-		bsonFilter = append(bsonFilter, bson.E{Key: key, Value: value})
+		if value != "" {
+			bsonFilter = append(bsonFilter, bson.E{Key: key, Value: value})
+		}
 	}
 
 	cur, err := a.collection().Find(

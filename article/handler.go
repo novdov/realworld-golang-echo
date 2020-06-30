@@ -2,6 +2,7 @@ package article
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -24,6 +25,7 @@ func (h *Handler) Register(g *echo.Group) {
 	jwtMiddleware := middleware.JWT(utils.JWTSecret)
 
 	article := g.Group("/articles", jwtMiddleware)
+	article.GET("", h.ListArticles)
 	article.POST("", h.Create)
 	article.GET("/:slug", h.GetSingleArticle)
 	article.PUT("/:slug", h.Update)
@@ -34,6 +36,46 @@ func (h *Handler) Register(g *echo.Group) {
 
 	tags := g.Group("/tags")
 	tags.GET("", h.GetTags)
+}
+
+func (h *Handler) ListArticles(c echo.Context) error {
+	query := map[string]string{
+		"tag":       c.QueryParam("tag"),
+		"author":    c.QueryParam("author"),
+		"favorited": c.QueryParam("favorited"),
+	}
+
+	offset, _ := strconv.Atoi(c.QueryParam("limit"))
+	limit, _ := strconv.Atoi(c.QueryParam("offset"))
+
+	articles, err := h.articleService.Find(
+		query,
+		int64(offset),
+		int64(limit),
+	)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+	}
+	if len(articles) == 0 {
+		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
+	}
+
+	var articlesResponses []*singleArticleResponse
+	for _, article := range articles {
+		user, err := h.userService.GetByID(article.Author)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, errors.NewError(err))
+		}
+		if user == nil {
+			return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
+		}
+		articlesResponses = append(articlesResponses, newSingleArticleResponse(article, user))
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"articles":      articlesResponses,
+		"articlesCount": len(articlesResponses),
+	})
 }
 
 func (h *Handler) Create(c echo.Context) error {
