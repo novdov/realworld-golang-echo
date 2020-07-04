@@ -149,6 +149,10 @@ func (h *Handler) Update(c echo.Context) error {
 		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
 	}
 
+	if user.ID == article.Author {
+		return c.JSON(http.StatusUnauthorized, errors.NewError(errors.AccessForbidden))
+	}
+
 	return c.JSON(http.StatusOK, newSingleArticleResponse(article, user))
 }
 
@@ -177,6 +181,10 @@ func (h *Handler) Delete(c echo.Context) error {
 	}
 	if user == nil {
 		return c.JSON(http.StatusNotFound, errors.NewError(errors.NotFound))
+	}
+
+	if user.ID == article.Author {
+		return c.JSON(http.StatusUnauthorized, errors.NewError(errors.AccessForbidden))
 	}
 
 	return c.JSON(http.StatusOK, map[string]interface{}{"result": "deleted article"})
